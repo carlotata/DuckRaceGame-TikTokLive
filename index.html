@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦆 Country Duck Race</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #080f1a;
+  --panel: #0d1a2e;
+  --border: #1e3a5f;
+  --border2: #2a4a70;
+  --gold: #ffc832;
+  --silver: #b8c8d8;
+  --bronze: #c87832;
+  --text: #e8f0ff;
+  --muted: #5a7a9a;
+  --accent: #ff3366;
+  --green: #00e5a0;
+  --grass: #1a5c2a;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;background:var(--bg);}
+body{color:var(--text);font-family:'Baloo 2',cursive;display:flex;flex-direction:column;font-size:13px;}
+
+/* ── HEADER ── */
+#hdr{
+  display:flex;align-items:center;gap:8px;
+  padding:4px 12px;
+  height:36px;
+  flex-shrink:0;
+  background:linear-gradient(90deg,#051025,#0a1e3a,#051025);
+  border-bottom:1px solid var(--border2);
+}
+#hdr-title{font-family:'Fredoka One',cursive;font-size:1.1rem;color:#fff;white-space:nowrap;}
+#hdr-title em{color:var(--gold);font-style:normal;}
+.hstat{display:flex;align-items:center;gap:4px;background:#ffffff0a;border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:.75rem;font-weight:700;white-space:nowrap;}
+#live-pill{background:var(--accent);border-radius:20px;padding:2px 10px;font-size:.7rem;font-weight:800;letter-spacing:1px;opacity:0;transition:opacity .3s;visibility:hidden;}
+#live-pill.on{opacity:1;visibility:visible;animation:liveBlink 1.4s infinite;}
+@keyframes liveBlink{0%,100%{box-shadow:0 0 0 0 #ff336655}60%{box-shadow:0 0 0 7px transparent}}
+.net-dot{width:8px;height:8px;border-radius:50%;background:#333;transition:.3s;flex-shrink:0;}
+.net-dot.on{background:var(--green);box-shadow:0 0 7px var(--green);}
+#net-txt{font-size:.7rem;color:var(--muted);}
+#hdr-space{flex:1;}
+
+/* ── MAIN ── */
+#main{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+/* ── WIN BOARD ── */
+#wboard{width:140px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+#wboard-head{padding:6px 10px;font-family:'Fredoka One',cursive;font-size:.85rem;color:var(--gold);letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#ffc83210,transparent);}
+#wboard-list{flex:1;overflow-y:auto;padding:4px 5px;}
+#wboard-list::-webkit-scrollbar{width:2px;}
+#wboard-list::-webkit-scrollbar-thumb{background:var(--border2);}
+.we{display:flex;align-items:center;gap:5px;padding:5px 6px;background:#ffffff07;border-radius:6px;margin-bottom:3px;border-left:3px solid #333;font-size:.72rem;animation:wePop .3s ease;}
+@keyframes wePop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.we.r1{border-color:var(--gold);}.we.r2{border-color:var(--silver);}.we.r3{border-color:var(--bronze);}
+.we-medal{font-size:.85rem;flex-shrink:0;}
+.we-flag{font-size:1rem;flex-shrink:0;}
+.we-name{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.we-ct{background:#ffffff12;border-radius:8px;padding:1px 5px;font-size:.65rem;font-weight:800;color:var(--gold);}
+
+/* ── RACE CENTER ── */
+#race{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;min-width:0;}
+
+#sky{height:32px;flex-shrink:0;background:linear-gradient(180deg,#0a2a5a,#1565c0);position:relative;overflow:hidden;}
+#sky-clouds{position:absolute;inset:0;display:flex;align-items:center;padding:0 10px;gap:30px;pointer-events:none;animation:cloudScroll 25s linear infinite;}
+.cloud{font-size:.9rem;opacity:.5;}
+@keyframes cloudScroll{from{transform:translateX(0)}to{transform:translateX(-100px)}}
+#race-btns{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;gap:5px;}
+.rbtn{background:#ffffff15;border:1px solid #ffffff30;color:#fff;border-radius:5px;padding:3px 12px;font-family:'Fredoka One',cursive;font-size:.75rem;cursor:pointer;transition:.15s;}
+.rbtn:hover{background:#ffffff28;}
+.rbtn.go{background:var(--accent);border-color:var(--accent);}
+.rbtn.go:hover{background:#ff1a53;}
+
+.grass{height:8px;flex-shrink:0;background:linear-gradient(180deg,#2d7a3a,var(--grass));position:relative;overflow:hidden;}
+
+#river{flex:1;overflow:hidden;position:relative;background:linear-gradient(180deg,#0a3d7a,#0d47a1 50%,#0a3d7a);}
+.wrow{position:absolute;left:0;right:0;height:4px;pointer-events:none;opacity:.18;}
+.wrow::after{content:'';display:block;height:100%;background:repeating-linear-gradient(90deg,transparent,transparent 50px,#fff 50px,#fff 80px);animation:wscroll var(--spd,6s) linear infinite;}
+@keyframes wscroll{from{transform:translateX(0)}to{transform:translateX(-80px)}}
+
+#finish{position:absolute;right:65px;top:0;bottom:0;width:10px;z-index:10;background:repeating-linear-gradient(180deg,#fff 0,#fff 8px,#111 8px,#111 16px);opacity:.75;}
+#finish-flag{position:absolute;right:70px;top:2px;font-size:1.2rem;z-index:11;}
+
+/* WINNER OVERLAY */
+#winner-ov{
+  display:none;
+  position:absolute;
+  inset:0;
+  z-index:999;
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(8px);
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:10px;
+}
+#winner-ov.show{display:flex;}
+#winner-box{
+  background:linear-gradient(145deg,#0d1e38,#162840);
+  border:2px solid var(--gold);
+  border-radius:16px;
+  padding:16px 36px;
+  text-align:center;
+  box-shadow:0 0 60px rgba(255, 200, 50, 0.2), inset 0 1px 0 #ffffff18;
+  animation:wboxPop .45s cubic-bezier(.3,0,.2,1);
+}
+@keyframes wboxPop{from{transform:scale(.55)rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+.w-duck{font-size:2.5rem;display:block;animation:wDuckWave .6s ease-in-out infinite alternate;}
+@keyframes wDuckWave{from{transform:rotate(-12deg)translateY(-4px)}to{transform:rotate(12deg)translateY(4px)}}
+.w-flag{font-size:2rem;display:block;margin:3px 0;}
+.w-lbl{font-family:'Fredoka One',cursive;font-size:.75rem;color:var(--muted);letter-spacing:2px;}
+.w-country{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--gold);margin:2px 0;}
+.w-stat{font-size:.72rem;color:var(--muted);}
+#w-replay{
+  background:linear-gradient(90deg,var(--accent),#ff8c42);
+  border:none;
+  border-radius:10px;
+  color:#fff;
+  font-family:'Fredoka One',cursive;
+  font-size:.9rem;
+  letter-spacing:1px;
+  padding:8px 24px;
+  cursor:pointer;
+  transition:.2s;
+}
+#w-replay:hover{opacity:.87;transform:scale(1.04);}
+
+.duck-wrap{position:absolute;display:flex;flex-direction:column;align-items:center;transition:left .22s cubic-bezier(.25,0,.15,1);z-index:5;}
+.duck-tag{background:#000000cc;border:1px solid #ffffff22;border-radius:6px;padding:1px 6px;font-size:.6rem;font-weight:800;white-space:nowrap;display:flex;align-items:center;gap:2px;max-width:80px;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;}
+.duck-svg{filter:drop-shadow(0 3px 8px rgba(0,0,0,.6));animation:waddle .55s ease-in-out infinite alternate;transform-origin:center bottom;}
+@keyframes waddle{from{transform:rotate(-6deg)translateY(0)}to{transform:rotate(6deg)translateY(-2px)}}
+.duck-wrap.boosted .duck-svg{animation:zoomWaddle .14s ease-in-out infinite alternate;filter:drop-shadow(0 0 12px var(--gold)) drop-shadow(0 3px 8px rgba(0,0,0,.6));}
+@keyframes zoomWaddle{from{transform:rotate(-9deg)translateY(-5px)scale(1.08)}to{transform:rotate(9deg)translateY(2px)scale(.97)}}
+
+/* SURGE overlay text */
+#surge-banner{
+  position:absolute;
+  top:8px;left:50%;transform:translateX(-50%);
+  z-index:50;
+  font-family:'Fredoka One',cursive;
+  font-size:1.1rem;
+  color:#fff;
+  background:linear-gradient(90deg,var(--accent),#ff8c42);
+  border-radius:20px;
+  padding:3px 18px;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .3s;
+  white-space:nowrap;
+  text-shadow:0 1px 4px #0008;
+}
+#surge-banner.show{opacity:1;}
+
+.fx-splash{position:absolute;pointer-events:none;z-index:30;font-size:1.2rem;animation:fxUp .55s ease forwards;}
+.fx-pct{position:absolute;pointer-events:none;z-index:30;font-size:.85rem;font-weight:900;font-family:'Fredoka One',cursive;animation:fxUp .75s ease forwards;}
+@keyframes fxUp{0%{opacity:1;transform:translateY(0)scale(1)}100%{opacity:0;transform:translateY(-36px)scale(1.3)}}
+
+/* ── PROGRESS BAR SECTION ── */
+#pbar-wrap{background:#060e1a;border-top:1px solid var(--border);padding:6px 10px;flex-shrink:0;display:flex;gap:6px;overflow-x:auto;align-items:flex-end;height:62px;}
+#pbar-wrap::-webkit-scrollbar{height:2px;}
+#pbar-wrap::-webkit-scrollbar-thumb{background:var(--border);}
+.pitem{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:40px;}
+.pitem-flag{font-size:1.1rem;line-height:1;}
+.pbar-bg{width:100%;height:8px;background:#ffffff12;border-radius:4px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:4px;transition:width .2s;}
+.pitem-pct{
+  font-family:'Fredoka One',cursive;
+  font-size:1rem;
+  font-weight:900;color:#fff;
+  text-shadow:0 0 14px currentColor;
+  line-height:1;
+}
+
+/* ── RIGHT PANEL ── */
+#rpanel{width:240px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;}
+#rpanel::-webkit-scrollbar{width:3px;}
+#rpanel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+#gift-head{padding:6px 10px;border-bottom:1px solid var(--border);font-family:'Fredoka One',cursive;font-size:.85rem;color:var(--accent);display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.boost-key{margin-left:auto;font-size:.6rem;font-family:'Baloo 2',cursive;color:var(--muted);font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
+.boost-key .bk-gift{color:var(--gold);}
+.boost-key .bk-chat{color:#6a9af0;}
+
+#gift-list{flex-shrink:0;display:flex;flex-direction:column;gap:4px;padding:4px 6px;}
+
+.gift-row{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ffffff0a,#ffffff05);border:1px solid var(--border2);border-radius:7px;padding:6px 8px;cursor:pointer;transition:.18s;flex-shrink:0;}
+.gift-row:hover{background:linear-gradient(135deg,#ffffff18,#ffffff0d);border-color:#3a6a9a;transform:translateX(2px);}
+.gift-row:active{transform:scale(.97);}
+.gift-row.flash{border-color:var(--gold)!important;background:#ffc83222!important;}
+
+.g-flag{font-size:1.2rem;flex-shrink:0;width:26px;text-align:center;}
+.g-info{flex:1;min-width:0;}
+.g-name{font-size:.8rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
+.g-id{font-size:.65rem;color:var(--green);font-weight:700;letter-spacing:.2px;}
+.g-boost{background:#ffc83220;border:1px solid #ffc83240;border-radius:7px;padding:2px 7px;font-size:.7rem;font-weight:800;color:var(--gold);white-space:nowrap;flex-shrink:0;}
+
+/* Feed */
+#feed-wrap{flex-shrink:0;border-top:1px solid var(--border);display:flex;flex-direction:column;max-height:90px;overflow:hidden;}
+#feed-head{padding:3px 10px;font-size:.62rem;color:var(--muted);}
+#feed{overflow-y:auto;padding:2px 6px 3px;display:flex;flex-direction:column;gap:2px;flex:1;}
+#feed::-webkit-scrollbar{width:2px;}
+#feed::-webkit-scrollbar-thumb{background:var(--border);}
+.fev{font-size:.62rem;background:#ffffff05;border-radius:4px;padding:2px 6px;animation:fevIn .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;border-left:2px solid transparent;}
+.fev.type-gift{border-color:var(--gold);}.fev.type-chat{border-color:#4a8af0;}
+@keyframes fevIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.fev-user{font-weight:800;color:#fff;}
+.fev-country{font-size:.85rem;}
+.fev-tag{font-size:.58rem;background:#ffffff12;border-radius:8px;padding:0 5px;margin-left:2px;}
+.fev-tag.gift{color:var(--gold);}.fev-tag.chat{color:#6a9af0;}
+
+/* CONNECT */
+#conn{padding:8px 8px;border-top:1px solid var(--border);flex-shrink:0;}
+#conn label{font-size:.62rem;color:var(--muted);display:block;margin-bottom:3px;}
+#conn input{width:100%;background:#ffffff08;border:1px solid var(--border2);border-radius:5px;color:#fff;font-family:'Baloo 2',cursive;font-size:.78rem;padding:5px 8px;outline:none;margin-bottom:5px;}
+#conn input:focus{border-color:var(--green);}
+#conn-btn{width:100%;background:var(--accent);border:none;border-radius:7px;color:#fff;font-family:'Fredoka One',cursive;font-size:.95rem;letter-spacing:.5px;padding:7px;cursor:pointer;transition:.18s;}
+#conn-btn:hover{opacity:.88;}
+#conn-btn.on{background:linear-gradient(90deg,#085c35,var(--green));color:#000;}
+#conn-btn:disabled{opacity:.5;cursor:not-allowed;}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div id="hdr-title">🦆 <em>DUCK RACE</em> LIVE 🌏</div>
+  <div class="hstat"><span>👥</span><span id="s-viewers">0</span></div>
+  <div class="hstat"><span>🪙</span><span id="s-coins">0</span></div>
+  <div class="hstat"><span>🏁</span><span id="s-races">0</span></div>
+
+  <div id="live-pill">● LIVE</div>
+  <div id="hdr-space"></div>
+  <div class="net-dot" id="net-dot"></div>
+  <span id="net-txt">OFFLINE</span>
+</div>
+
+<div id="main">
+  <div id="wboard">
+    <div id="wboard-head">🏆 WIN BOARD</div>
+    <div id="wboard-list">
+      <div style="color:var(--muted);font-size:.65rem;padding:10px;text-align:center;line-height:1.6;">No races yet.<br>🦆 Send gifts!</div>
+    </div>
+  </div>
+
+  <div id="race">
+    <div id="sky">
+      <div id="sky-clouds">
+        <span class="cloud">☁️</span><span class="cloud">☁️</span><span class="cloud">☁️</span>
+        <span class="cloud">☁️</span><span class="cloud">☁️</span><span class="cloud">☁️</span>
+      </div>
+      <div id="race-btns">
+        <button class="rbtn" onclick="resetRace()">↺ Reset</button>
+        <button class="rbtn go" onclick="startRace()">▶ START</button>
+      </div>
+    </div>
+
+    <div class="grass"></div>
+    
+    <div id="river">
+      <div id="finish"></div>
+      <div id="surge-banner"></div>
+      
+      <div id="winner-ov">
+        <div id="winner-box">
+          <span class="w-duck">🦆</span>
+          <span class="w-flag" id="w-flag">🏳️</span>
+          <div class="w-lbl">🏆 WINNER 🏆</div>
+          <div class="w-country" id="w-country">—</div>
+          <div class="w-stat" id="w-stat"></div>
+        </div>
+        <button id="w-replay" onclick="resetRace();document.getElementById('winner-ov').classList.remove('show')">🦆 RACE AGAIN!</button>
+      </div>
+    </div>
+
+    <div class="grass"></div>
+    <div id="pbar-wrap"></div>
+  </div>
+
+  <div id="rpanel">
+    <div id="gift-head">
+      🎁 SEND GIFT TO BOOST
+      <div class="boost-key">
+        <span class="bk-gift">🎁 +5%</span>
+        <span class="bk-chat">💬 +0.3%</span>
+      </div>
+    </div>
+
+    <div id="gift-list"></div>
+    <div id="feed-wrap">
+      <div id="feed-head">📡 LIVE FEED</div>
+      <div id="feed"></div>
+    </div>
+    <div id="conn">
+      <label>TIKTOK USERNAME</label>
+      <input id="ttUser" type="text" placeholder="@yourusername" />
+      <button id="conn-btn" onclick="toggleConnect()">▶ GO LIVE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GIFT_BOOST  = 5;
+const CHAT_BOOST  = 0.3;
+
+const COUNTRIES = [
+  {id:'ph', name:'Philippines', flag:'🇵🇭', color:'#fcd116', bodyColor:'#003087', giftId:16757, giftName:'Bibingka',          chatCmd:['philippines','ph','pilipinas'], lat:12.8797,  lon:121.7740,  iso:'PH'},
+  {id:'us', name:'USA',         flag:'🇺🇸', color:'#b22234', bodyColor:'#3c3b6e', giftId:5583,  giftName:'Fire',             chatCmd:['usa','us','america'],          lat:37.0902,  lon:-95.7129,  iso:'US'},
+  {id:'id', name:'Indonesia',   flag:'🇮🇩', color:'#ce1126', bodyColor:'#dddddd', giftId:5655,  giftName:'Rose',             chatCmd:['indonesia','id'],              lat:-0.7893,  lon:113.9213,  iso:'ID'},
+  {id:'br', name:'Brazil',      flag:'🇧🇷', color:'#009c3b', bodyColor:'#ffdf00', giftId:5827,  giftName:'Ice Cream Cone',   chatCmd:['brazil','br','brasil'],        lat:-14.2350, lon:-51.9253,  iso:'BR'},
+  {id:'in', name:'India',       flag:'🇮🇳', color:'#ff9933', bodyColor:'#138808', giftId:6064,  giftName:'GG',               chatCmd:['india','in'],                  lat:20.5937,  lon:78.9629,   iso:'IN'},
+  {id:'my', name:'Malaysia',    flag:'🇲🇾', color:'#cc0001', bodyColor:'#ffcc00', giftId:15232, giftName:"You're awesome",   chatCmd:['malaysia','my'],               lat:4.2105,   lon:101.9758,  iso:'MY'},
+  {id:'jp', name:'Japan',       flag:'🇯🇵', color:'#bc002d', bodyColor:'#f9f9f9', giftId:5269,  giftName:'TikTok',           chatCmd:['japan','jp','jpn'],            lat:36.2048,  lon:138.2529,  iso:'JP'},
+];
+
+const cmdMap = {};
+COUNTRIES.forEach(c => c.chatCmd.forEach(cmd => cmdMap[cmd] = c.id));
+
+const geoCache = {};
+function degToRad(d){ return d * Math.PI / 180; }
+function haverDist(lat1,lon1,lat2,lon2){
+  const R=6371,dLat=degToRad(lat2-lat1),dLon=degToRad(lon2-lon1);
+  const a=Math.sin(dLat/2)**2+Math.cos(degToRad(lat1))*Math.cos(degToRad(lat2))*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function nearestCountry(lat,lon){
+  let best=COUNTRIES[0],bestDist=Infinity;
+  COUNTRIES.forEach(c=>{const d=haverDist(lat,lon,c.lat,c.lon);if(d<bestDist){bestDist=d;best=c;}});
+  return best;
+}
+function resolveCidFromGeo(isoCode,lat,lon){
+  if(geoCache[isoCode])return geoCache[isoCode];
+  const exact=COUNTRIES.find(c=>c.iso===isoCode);
+  const cid=exact?exact.id:nearestCountry(lat,lon).id;
+  geoCache[isoCode]=cid;
+  return cid;
+}
+
+// ── RNG RACE PHYSICS ──
+let state = buildState();
+let raceActive=false, raceFinished=false, finishCount=0;
+let totalCoins=0, totalRaces=0, totalViewers=0;
+let connected=false, rafId=null, lastTs=0, ws=null;
+let autoTimer=null;
+let winCounts={};
+COUNTRIES.forEach(c=>winCounts[c.id]=0);
+
+let duckMomentum = {};
+
+function buildState(){
+  return COUNTRIES.map(c=>({...c,progress:0,coins:0,giftCount:0,chatCount:0,finished:false,finishRank:0}));
+}
+
+function initMomentum(){
+  duckMomentum={};
+  COUNTRIES.forEach(c=>{
+    duckMomentum[c.id]={
+      speed: 0.01 + Math.random()*0.02,
+      surge: 0,
+      surgeLeft: 0,
+      eventCd: Math.floor(80 + Math.random()*120),
+    };
+  });
+}
+
+const SURGE_MSGS = [
+  (name,flag) => `${flag} ${name} SURGING! 🚀`,
+  (name,flag) => `${flag} ${name} IS ON FIRE! 🔥`,
+  (name,flag) => `${flag} ${name} OVERTAKING! 💨`,
+  (name,flag) => `COMEBACK! ${flag} ${name} 🌊`,
+];
+
+let surgeBannerTimer = null;
+function showSurgeBanner(msg){
+  const b=document.getElementById('surge-banner');
+  b.textContent=msg;b.classList.add('show');
+  clearTimeout(surgeBannerTimer);
+  surgeBannerTimer=setTimeout(()=>b.classList.remove('show'),1800);
+}
+
+function tickMomentum(dt){
+  const sorted=[...state].filter(c=>!c.finished).sort((a,b)=>b.progress-a.progress);
+  const leader = sorted[0];
+
+  sorted.forEach((c,rank)=>{
+    const m=duckMomentum[c.id];
+    if(!m)return;
+
+    m.eventCd-=(dt/16);
+
+    if(m.surgeLeft>0){
+      m.surgeLeft-=(dt/16);
+      if(m.surgeLeft<=0){ m.surge=1; }
+    }
+
+    if(m.eventCd<=0){
+      m.eventCd=60+Math.random()*160;
+      const rng=Math.random();
+
+      if(rank===0){
+        if(rng<0.40){
+          m.surge=0.18+Math.random()*0.22;
+          m.surgeLeft=60+Math.random()*90;
+        } else {
+          m.surge=0.65;m.surgeLeft=30+Math.random()*40;
+        }
+      } else {
+        const gap = (leader ? leader.progress : 0) - c.progress;
+        const surgeChance = 0.30 + (gap/100)*0.45;
+        if(rng < surgeChance){
+          m.surge = 1.8 + Math.random()*1.4;
+          m.surgeLeft = 40 + Math.random()*80;
+          if(gap>5 && rank<=2){
+            const country=COUNTRIES.find(x=>x.id===c.id);
+            const msgFn=SURGE_MSGS[Math.floor(Math.random()*SURGE_MSGS.length)];
+            showSurgeBanner(msgFn(country.name, country.flag));
+          }
+        } else if(rng<surgeChance+0.15){
+          m.surge=0.5;m.surgeLeft=25+Math.random()*35;
+        }
+      }
+    }
+  });
+}
+
+function raceLoop(ts){
+  if(!raceActive)return;
+  const dt=Math.min(ts-lastTs,50);lastTs=ts;
+
+  tickMomentum(dt);
+
+  state.forEach(c=>{
+    if(c.finished)return;
+    const m=duckMomentum[c.id];
+    const surgeMulti = (m&&m.surgeLeft>0) ? m.surge : 1.0;
+    const baseSpeed = m ? m.speed : 0.045;
+    const noise = 0.6+Math.random()*0.8;
+    let finishDrag = 1.0;
+    if(c.progress>88) finishDrag = 0.60;
+    if(c.progress>94) finishDrag = 0.40;
+    const speed = baseSpeed * surgeMulti * noise * finishDrag;
+    c.progress += speed*(dt/16);
+    if(c.progress>=100){
+      c.progress=100;c.finished=true;finishCount++;c.finishRank=finishCount;
+      if(finishCount===1) onWinner(c);
+    }
+  });
+
+  updatePositions();
+  rafId=requestAnimationFrame(raceLoop);
+}
+
+function startRace(){
+  if(raceActive)return;
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+  initMomentum();
+  raceActive=true;raceFinished=false;lastTs=performance.now();
+  rafId=requestAnimationFrame(raceLoop);
+}
+
+function resetRace(){
+  raceActive=false;raceFinished=false;finishCount=0;
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+  if(rafId)cancelAnimationFrame(rafId);
+  state=buildState();
+  totalCoins=0;
+  buildRiver();buildProgressBars();updatePositions();
+  document.getElementById('winner-ov').classList.remove('show');
+  document.getElementById('surge-banner').classList.remove('show');
+}
+
+function boost(cid,amount,type,user){
+  if(raceFinished)return;
+  const c=state.find(x=>x.id===cid);
+  if(!c||c.finished)return;
+  c.progress+=amount;
+  if(type==='gift'){c.giftCount++;c.coins++;totalCoins++;}
+  else if(type==='chat'){c.chatCount++;}
+  if(!raceActive)startRace();
+  if(c.progress>=100){c.progress=100;c.finished=true;finishCount++;c.finishRank=finishCount;if(finishCount===1)onWinner(c);}
+
+  const row=document.getElementById('gift-row-'+cid);
+  if(row){row.classList.add('flash');setTimeout(()=>row.classList.remove('flash'),500);}
+  const wrap=document.getElementById('duck-'+cid);
+  if(wrap){
+    wrap.classList.add('boosted');
+    clearTimeout(wrap._bt);
+    wrap._bt=setTimeout(()=>wrap.classList.remove('boosted'),650);
+    const emoji=type==='gift'?'🎁':'💬';
+    const color=type==='gift'?'#ffc832':'#6a9af0';
+    spawnFX(wrap,emoji,color,'+'+amount+'%');
+  }
+  addFeed(user,c,type);
+  updatePositions();
+}
+
+function spawnFX(wrap,emoji,color,label){
+  const river=document.getElementById('river');
+  const wr=wrap.getBoundingClientRect(),rr=river.getBoundingClientRect();
+  const x=wr.left-rr.left+8,y=wr.top-rr.top;
+  const s=document.createElement('div');s.className='fx-splash';s.textContent=emoji;s.style.cssText=`left:${x}px;top:${y}px`;
+  river.appendChild(s);setTimeout(()=>s.remove(),650);
+  const p=document.createElement('div');p.className='fx-pct';p.textContent=label;p.style.cssText=`color:${color};left:${x+20}px;top:${y-8}px`;
+  river.appendChild(p);setTimeout(()=>p.remove(),850);
+}
+
+function doGift(cid,user){boost(cid,GIFT_BOOST,'gift',user||'you');}
+function doChatCmd(cid,user){boost(cid,CHAT_BOOST,'chat',user||'viewer');}
+
+function parseChatCommand(msg,user){
+  const m=msg.trim().toLowerCase();
+  if(!m.startsWith('/'))return false;
+  const cid=cmdMap[m.slice(1).replace(/\s+/g,'')];
+  if(cid){doChatCmd(cid,user);return true;}
+  return false;
+}
+
+function addFeed(user,country,type){
+  const feed=document.getElementById('feed');
+  const div=document.createElement('div');
+  div.className='fev type-'+type;
+  let tag;
+  if(type==='gift') tag=`<span class="fev-tag gift">🎁 ${country.giftName} +${GIFT_BOOST}%</span>`;
+  else tag=`<span class="fev-tag chat">💬 /${country.id} +${CHAT_BOOST}%</span>`;
+  div.innerHTML=`<span class="fev-country">${country.flag}</span><span class="fev-user">${user}</span>${tag}`;
+  feed.prepend(div);
+  while(feed.children.length>20)feed.removeChild(feed.lastChild);
+}
+
+function onWinner(c){
+  raceActive=false;raceFinished=true;totalRaces++;
+  winCounts[c.id]++;
+  updateWinBoard();
+  setTimeout(()=>{
+    document.getElementById('w-flag').textContent=c.flag;
+    document.getElementById('w-country').textContent=c.name.toUpperCase();
+    document.getElementById('w-stat').textContent=`Won with ${c.coins} boosts!`;
+    document.getElementById('winner-ov').classList.add('show');
+    let timeLeft=3;
+    const btn=document.getElementById('w-replay');
+    btn.textContent=`NEXT RACE IN ${timeLeft}...`;
+    autoTimer=setInterval(()=>{
+      timeLeft--;
+      if(timeLeft<=0){
+        clearInterval(autoTimer);
+        resetRace();
+        setTimeout(startRace,500);
+      }else{
+        btn.textContent=`NEXT RACE IN ${timeLeft}...`;
+      }
+    },1000);
+  },1500);
+  const wrap=document.getElementById('duck-'+c.id);
+  if(wrap)wrap.classList.add('boosted');
+}
+
+function updateWinBoard(){
+  const sorted=COUNTRIES.filter(c=>winCounts[c.id]>0).sort((a,b)=>winCounts[b.id]-winCounts[a.id]);
+  const list=document.getElementById('wboard-list');
+  list.innerHTML='';
+  if(!sorted.length){list.innerHTML='<div style="color:var(--muted);font-size:.65rem;padding:10px;text-align:center;line-height:1.6;">No races yet.<br>🦆 Send gifts!</div>';return;}
+  sorted.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='we '+(i===0?'r1':i===1?'r2':i===2?'r3':'');
+    const m=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+    d.innerHTML=`<span class="we-medal">${m}</span><span class="we-flag">${c.flag}</span><span class="we-name">${c.name}</span><span class="we-ct">${winCounts[c.id]}</span>`;
+    list.appendChild(d);
+  });
+}
+
+function buildGiftList(){
+  const list=document.getElementById('gift-list');
+  list.innerHTML='';
+  COUNTRIES.forEach(c=>{
+    const row=document.createElement('div');
+    row.className='gift-row';row.id='gift-row-'+c.id;
+    row.onclick=()=>doGift(c.id,'you');
+    row.innerHTML=`<span class="g-flag">${c.flag}</span><div class="g-info"><div class="g-name">${c.giftName}</div><div class="g-id">ID: ${c.giftId} · ${c.name}</div></div><span class="g-boost">+${GIFT_BOOST}%</span>`;
+    list.appendChild(row);
+  });
+}
+
+function makeDuck(color,bodyColor,size){
+  const light=['#ffffff','#f9f9f9','#f5f5f5','#eeeeee','#dddddd','#f0f0f0'];
+  const bc=light.includes(bodyColor)?'#ccd8e8':bodyColor;
+  return `<svg class="duck-svg" width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="19" cy="26" rx="13" ry="9" fill="${color}"/>
+    <ellipse cx="17" cy="27.5" rx="8" ry="5" fill="${bc}" opacity=".45"/>
+    <ellipse cx="29" cy="20" rx="5" ry="7" fill="${color}"/>
+    <circle cx="31" cy="13" r="7" fill="${color}"/>
+    <circle cx="34" cy="11" r="1.5" fill="#111"/>
+    <circle cx="34.5" cy="10.5" r=".55" fill="#fff"/>
+    <ellipse cx="38" cy="13" rx="3" ry="2" fill="#ffa500"/>
+    <ellipse cx="19" cy="33" rx="12" ry="2.5" fill="#0a3d7a" opacity=".45"/>
+  </svg>`;
+}
+
+function buildRiver(){
+  const river=document.getElementById('river');
+  river.querySelectorAll('.duck-wrap,.wrow').forEach(e=>e.remove());
+  for(let i=0;i<4;i++){
+    const w=document.createElement('div');
+    w.className='wrow';w.style.top=(12+i*22)+'%';
+    w.style.setProperty('--spd',(5+i*1.5)+'s');
+    river.appendChild(w);
+  }
+  const riverH=river.clientHeight||300;
+  const laneH=riverH/state.length;
+  const ds=32;
+  state.forEach((c,i)=>{
+    const wrap=document.createElement('div');
+    wrap.className='duck-wrap';wrap.id='duck-'+c.id;
+    wrap.style.top=(laneH*i+laneH/2-ds*0.75)+'px';
+    wrap.style.left='14px';
+    wrap.innerHTML=`<div class="duck-tag"><span>${c.flag}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name}</span></div>`+makeDuck(c.color,c.bodyColor,ds);
+    river.appendChild(wrap);
+  });
+}
+
+function buildProgressBars(){
+  const wrap=document.getElementById('pbar-wrap');
+  wrap.innerHTML='';
+  state.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='pitem';
+    d.innerHTML=`<span class="pitem-flag">${c.flag}</span><div class="pbar-bg"><div class="pbar-fill" id="pb-${c.id}" style="background:${c.color};width:0%"></div></div><span class="pitem-pct" id="pp-${c.id}" style="color:${c.color};text-shadow:0 0 12px ${c.color}">0%</span>`;
+    wrap.appendChild(d);
+  });
+}
+
+function updatePositions(){
+  const river=document.getElementById('river');
+  const riverW=river.clientWidth||600;
+  const finRight=70,startX=14,ds=32;
+  const range=riverW-finRight-startX-ds;
+  state.forEach(c=>{
+    const wrap=document.getElementById('duck-'+c.id);
+    if(!wrap)return;
+    wrap.style.left=(startX+(Math.min(c.progress,100)/100)*range)+'px';
+    const pb=document.getElementById('pb-'+c.id);
+    const pp=document.getElementById('pp-'+c.id);
+    if(pb)pb.style.width=Math.min(c.progress,100)+'%';
+    if(pp)pp.textContent=Math.round(Math.min(c.progress,100))+'%';
+  });
+  document.getElementById('s-coins').textContent=totalCoins;
+  document.getElementById('s-viewers').textContent=totalViewers;
+  document.getElementById('s-races').textContent=totalRaces;
+}
+
+function showConnectionError(msg){
+  connected=false;
+  const btn=document.getElementById('conn-btn');
+  btn.textContent='▶ GO LIVE';btn.classList.remove('on');btn.disabled=false;
+  document.getElementById('net-dot').classList.remove('on');
+  document.getElementById('net-txt').textContent='OFFLINE';
+  document.getElementById('live-pill').classList.remove('on');
+  alert('❌ Connection failed: '+msg+'\n\nMake sure your TikTok Live bridge is running on ws://localhost:8080');
+}
+
+function toggleConnect(){
+  const user=document.getElementById('ttUser').value.trim().replace('@','');
+  const btn=document.getElementById('conn-btn');
+  if(!connected){
+    if(!user){alert('Enter your TikTok username!');return;}
+    btn.textContent='⏳ CONNECTING…';btn.disabled=true;
+    try{
+      ws=new WebSocket('ws://localhost:8080');
+      ws.onopen=()=>{
+        ws.send(JSON.stringify({action:'connect',username:user}));
+        connected=true;
+        btn.textContent='■ DISCONNECT';btn.classList.add('on');btn.disabled=false;
+        document.getElementById('net-dot').classList.add('on');
+        document.getElementById('net-txt').textContent='LIVE: @'+user;
+        document.getElementById('live-pill').classList.add('on');
+        if(!raceActive)startRace();
+      };
+      ws.onmessage=e=>{
+        try{
+          const data=JSON.parse(e.data);
+          if(data.type==='gift'){
+            const c=COUNTRIES.find(x=>x.giftId==data.giftId);
+            if(c)doGift(c.id,data.user||'viewer');
+          }
+          else if(data.type==='chat'){
+            parseChatCommand(data.msg,data.user||'viewer');
+          }
+          else if(data.type==='viewer'){
+            totalViewers=data.count||totalViewers;
+            updatePositions();
+          }
+        }catch(err){}
+      };
+      ws.onerror=()=>showConnectionError('Could not reach bridge server on localhost:8080');
+      ws.onclose=()=>{if(connected)showConnectionError('Bridge server disconnected unexpectedly');};
+    }catch(e){showConnectionError('WebSocket not supported or failed to connect');}
+  }else{
+    connected=false;
+    btn.textContent='▶ GO LIVE';btn.classList.remove('on');btn.disabled=false;
+    document.getElementById('net-dot').classList.remove('on');
+    document.getElementById('net-txt').textContent='OFFLINE';
+    document.getElementById('live-pill').classList.remove('on');
+    if(ws){try{ws.close();}catch(e2){}ws=null;}
+  }
+}
+
+window.addEventListener('load',()=>{
+  buildGiftList();buildRiver();buildProgressBars();updatePositions();updateWinBoard();
+});
+window.addEventListener('resize',()=>{buildRiver();updatePositions();});
+</script>
+</body>
+</html>
