@@ -4,310 +4,337 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🦆 Country Duck Race</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        fredoka: ['"Fredoka One"', 'cursive'],
+        baloo: ['"Baloo 2"', 'cursive'],
+      },
+      colors: {
+        bg:      '#080f1a',
+        panel:   '#0d1a2e',
+        border:  '#1e3a5f',
+        border2: '#2a4a70',
+        gold:    '#ffc832',
+        silver:  '#b8c8d8',
+        bronze:  '#c87832',
+        muted:   '#5a7a9a',
+        accent:  '#ff3366',
+        green:   '#00e5a0',
+        grass:   '#1a5c2a',
+      },
+      keyframes: {
+        waddle:      { from: { transform: 'rotate(-6deg) translateY(0)' },     to: { transform: 'rotate(6deg) translateY(-2px)' } },
+        zoomWaddle:  { from: { transform: 'rotate(-9deg) translateY(-5px) scale(1.08)' }, to: { transform: 'rotate(9deg) translateY(2px) scale(.97)' } },
+        weDuckWave:  { from: { transform: 'rotate(-12deg) translateY(-4px)' }, to: { transform: 'rotate(12deg) translateY(4px)' } },
+        wePop:       { from: { transform: 'scale(.55) rotate(-6deg)', opacity: '0' }, to: { transform: 'none', opacity: '1' } },
+        liveBlink:   { '0%,100%': { boxShadow: '0 0 0 0 #ff336655' }, '60%': { boxShadow: '0 0 0 7px transparent' } },
+        cloudScroll: { from: { transform: 'translateX(0)' },            to:   { transform: 'translateX(-100px)' } },
+        wscroll:     { from: { transform: 'translateX(0)' },            to:   { transform: 'translateX(-80px)' } },
+        wePop2:      { from: { opacity: '0', transform: 'scale(.85)' }, to:   { opacity: '1', transform: 'scale(1)' } },
+        fevIn:       { from: { opacity: '0', transform: 'translateY(3px)' }, to: { opacity: '1', transform: 'none' } },
+        fxUp:        { '0%':  { opacity: '1', transform: 'translateY(0) scale(1)' }, '100%': { opacity: '0', transform: 'translateY(-36px) scale(1.3)' } },
+        wscrollCss:  { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-80px)' } },
+      },
+      animation: {
+        waddle:      'waddle .55s ease-in-out infinite alternate',
+        zoomWaddle:  'zoomWaddle .14s ease-in-out infinite alternate',
+        weDuckWave:  'weDuckWave .6s ease-in-out infinite alternate',
+        wePop:       'wePop .45s cubic-bezier(.3,0,.2,1)',
+        liveBlink:   'liveBlink 1.4s infinite',
+        cloudScroll: 'cloudScroll 25s linear infinite',
+        wePop2:      'wePop2 .3s ease',
+        fevIn:       'fevIn .2s ease',
+        fxUp:        'fxUp .55s ease forwards',
+      },
+    }
+  }
+}
+</script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@400;600;700;800&display=swap');
+  html,body { height:100%; overflow:hidden; }
+  body { font-family:'Baloo 2',cursive; }
+  *  { box-sizing:border-box; margin:0; padding:0; }
 
-:root {
-  --bg: #080f1a;
-  --panel: #0d1a2e;
-  --border: #1e3a5f;
-  --border2: #2a4a70;
-  --gold: #ffc832;
-  --silver: #b8c8d8;
-  --bronze: #c87832;
-  --text: #e8f0ff;
-  --muted: #5a7a9a;
-  --accent: #ff3366;
-  --green: #00e5a0;
-  --grass: #1a5c2a;
-}
+  /* scrollbars */
+  ::-webkit-scrollbar       { width:3px; height:2px; }
+  ::-webkit-scrollbar-thumb { background:#2a4a70; border-radius:2px; }
 
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;overflow:hidden;background:var(--bg);}
-body{color:var(--text);font-family:'Baloo 2',cursive;display:flex;flex-direction:column;font-size:13px;}
+  /* river waves */
+  .wrow::after {
+    content:'';display:block;height:100%;
+    background:repeating-linear-gradient(90deg,transparent,transparent 50px,#fff 50px,#fff 80px);
+    animation: wscrollCss var(--spd,6s) linear infinite;
+  }
+  @keyframes wscrollCss { from{transform:translateX(0)} to{transform:translateX(-80px)} }
 
-/* ── HEADER ── */
-#hdr{
-  display:flex;align-items:center;gap:8px;
-  padding:4px 12px;
-  height:36px;
-  flex-shrink:0;
-  background:linear-gradient(90deg,#051025,#0a1e3a,#051025);
-  border-bottom:1px solid var(--border2);
-}
-#hdr-title{font-family:'Fredoka One',cursive;font-size:1.1rem;color:#fff;white-space:nowrap;}
-#hdr-title em{color:var(--gold);font-style:normal;}
-.hstat{display:flex;align-items:center;gap:4px;background:#ffffff0a;border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:.75rem;font-weight:700;white-space:nowrap;}
-#live-pill{background:var(--accent);border-radius:20px;padding:2px 10px;font-size:.7rem;font-weight:800;letter-spacing:1px;opacity:0;transition:opacity .3s;visibility:hidden;}
-#live-pill.on{opacity:1;visibility:visible;animation:liveBlink 1.4s infinite;}
-@keyframes liveBlink{0%,100%{box-shadow:0 0 0 0 #ff336655}60%{box-shadow:0 0 0 7px transparent}}
-.net-dot{width:8px;height:8px;border-radius:50%;background:#333;transition:.3s;flex-shrink:0;}
-.net-dot.on{background:var(--green);box-shadow:0 0 7px var(--green);}
-#net-txt{font-size:.7rem;color:var(--muted);}
-#hdr-space{flex:1;}
+  /* duck animations */
+  .duck-svg { animation: waddle .55s ease-in-out infinite alternate; transform-origin:center bottom; }
+  .duck-wrap.boosted .duck-svg {
+    animation: zoomWaddle .14s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 12px #ffc832) drop-shadow(0 3px 8px rgba(0,0,0,.6));
+  }
+  .duck-svg:not(.boosted .duck-svg) { filter: drop-shadow(0 3px 8px rgba(0,0,0,.6)); }
 
-/* ── MAIN ── */
-#main{display:flex;flex:1;overflow:hidden;min-height:0;}
+  /* winner overlay duck */
+  .w-duck { animation: weDuckWave .6s ease-in-out infinite alternate; }
+  #winner-box { animation: wePop .45s cubic-bezier(.3,0,.2,1); }
 
-/* ── WIN BOARD ── */
-#wboard{width:140px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-#wboard-head{padding:6px 10px;font-family:'Fredoka One',cursive;font-size:.85rem;color:var(--gold);letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#ffc83210,transparent);}
-#wboard-list{flex:1;overflow-y:auto;padding:4px 5px;}
-#wboard-list::-webkit-scrollbar{width:2px;}
-#wboard-list::-webkit-scrollbar-thumb{background:var(--border2);}
-.we{display:flex;align-items:center;gap:5px;padding:5px 6px;background:#ffffff07;border-radius:6px;margin-bottom:3px;border-left:3px solid #333;font-size:.72rem;animation:wePop .3s ease;}
-@keyframes wePop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-.we.r1{border-color:var(--gold);}.we.r2{border-color:var(--silver);}.we.r3{border-color:var(--bronze);}
-.we-medal{font-size:.85rem;flex-shrink:0;}
-.we-flag{font-size:1rem;flex-shrink:0;}
-.we-name{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.we-ct{background:#ffffff12;border-radius:8px;padding:1px 5px;font-size:.65rem;font-weight:800;color:var(--gold);}
+  /* win-board entry pop */
+  .we { animation: wePop2 .3s ease; }
 
-/* ── RACE CENTER ── */
-#race{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;min-width:0;}
+  /* feed entry */
+  .fev { animation: fevIn .2s ease; }
 
-#sky{height:32px;flex-shrink:0;background:linear-gradient(180deg,#0a2a5a,#1565c0);position:relative;overflow:hidden;}
-#sky-clouds{position:absolute;inset:0;display:flex;align-items:center;padding:0 10px;gap:30px;pointer-events:none;animation:cloudScroll 25s linear infinite;}
-.cloud{font-size:.9rem;opacity:.5;}
-@keyframes cloudScroll{from{transform:translateX(0)}to{transform:translateX(-100px)}}
-#race-btns{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;gap:5px;}
-.rbtn{background:#ffffff15;border:1px solid #ffffff30;color:#fff;border-radius:5px;padding:3px 12px;font-family:'Fredoka One',cursive;font-size:.75rem;cursor:pointer;transition:.15s;}
-.rbtn:hover{background:#ffffff28;}
-.rbtn.go{background:var(--accent);border-color:var(--accent);}
-.rbtn.go:hover{background:#ff1a53;}
+  /* fx particles */
+  .fx-splash,.fx-pct { animation: fxUp .55s ease forwards; }
 
-.grass{height:8px;flex-shrink:0;background:linear-gradient(180deg,#2d7a3a,var(--grass));position:relative;overflow:hidden;}
+  /* live pill blink */
+  #live-pill.on { animation: liveBlink 1.4s infinite; }
 
-#river{flex:1;overflow:hidden;position:relative;background:linear-gradient(180deg,#0a3d7a,#0d47a1 50%,#0a3d7a);}
-.wrow{position:absolute;left:0;right:0;height:4px;pointer-events:none;opacity:.18;}
-.wrow::after{content:'';display:block;height:100%;background:repeating-linear-gradient(90deg,transparent,transparent 50px,#fff 50px,#fff 80px);animation:wscroll var(--spd,6s) linear infinite;}
-@keyframes wscroll{from{transform:translateX(0)}to{transform:translateX(-80px)}}
+  /* sky cloud scroll */
+  #sky-clouds { animation: cloudScroll 25s linear infinite; }
 
-#finish{position:absolute;right:65px;top:0;bottom:0;width:10px;z-index:10;background:repeating-linear-gradient(180deg,#fff 0,#fff 8px,#111 8px,#111 16px);opacity:.75;}
-#finish-flag{position:absolute;right:70px;top:2px;font-size:1.2rem;z-index:11;}
+  /* gift row flash */
+  .gift-row.flash { border-color:#ffc832!important; background:#ffc83222!important; }
 
-/* WINNER OVERLAY */
-#winner-ov{
-  display:none;
-  position:absolute;
-  inset:0;
-  z-index:999;
-  background:rgba(0,0,0,0.7);
-  backdrop-filter:blur(8px);
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  gap:10px;
-}
-#winner-ov.show{display:flex;}
-#winner-box{
-  background:linear-gradient(145deg,#0d1e38,#162840);
-  border:2px solid var(--gold);
-  border-radius:16px;
-  padding:16px 36px;
-  text-align:center;
-  box-shadow:0 0 60px rgba(255, 200, 50, 0.2), inset 0 1px 0 #ffffff18;
-  animation:wboxPop .45s cubic-bezier(.3,0,.2,1);
-}
-@keyframes wboxPop{from{transform:scale(.55)rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
-.w-duck{font-size:2.5rem;display:block;animation:wDuckWave .6s ease-in-out infinite alternate;}
-@keyframes wDuckWave{from{transform:rotate(-12deg)translateY(-4px)}to{transform:rotate(12deg)translateY(4px)}}
-.w-flag{font-size:2rem;display:block;margin:3px 0;}
-.w-lbl{font-family:'Fredoka One',cursive;font-size:.75rem;color:var(--muted);letter-spacing:2px;}
-.w-country{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--gold);margin:2px 0;}
-.w-stat{font-size:.72rem;color:var(--muted);}
-#w-replay{
-  background:linear-gradient(90deg,var(--accent),#ff8c42);
-  border:none;
-  border-radius:10px;
-  color:#fff;
-  font-family:'Fredoka One',cursive;
-  font-size:.9rem;
-  letter-spacing:1px;
-  padding:8px 24px;
-  cursor:pointer;
-  transition:.2s;
-}
-#w-replay:hover{opacity:.87;transform:scale(1.04);}
+  /* surge banner */
+  #surge-banner { opacity:0; transition:opacity .3s; }
+  #surge-banner.show { opacity:1; }
 
-.duck-wrap{position:absolute;display:flex;flex-direction:column;align-items:center;transition:left .22s cubic-bezier(.25,0,.15,1);z-index:5;}
-.duck-tag{background:#000000cc;border:1px solid #ffffff22;border-radius:6px;padding:1px 6px;font-size:.6rem;font-weight:800;white-space:nowrap;display:flex;align-items:center;gap:2px;max-width:80px;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;}
-.duck-svg{filter:drop-shadow(0 3px 8px rgba(0,0,0,.6));animation:waddle .55s ease-in-out infinite alternate;transform-origin:center bottom;}
-@keyframes waddle{from{transform:rotate(-6deg)translateY(0)}to{transform:rotate(6deg)translateY(-2px)}}
-.duck-wrap.boosted .duck-svg{animation:zoomWaddle .14s ease-in-out infinite alternate;filter:drop-shadow(0 0 12px var(--gold)) drop-shadow(0 3px 8px rgba(0,0,0,.6));}
-@keyframes zoomWaddle{from{transform:rotate(-9deg)translateY(-5px)scale(1.08)}to{transform:rotate(9deg)translateY(2px)scale(.97)}}
+  /* progress bar transition */
+  .pbar-fill { transition: width .2s; }
 
-/* SURGE overlay text */
-#surge-banner{
-  position:absolute;
-  top:8px;left:50%;transform:translateX(-50%);
-  z-index:50;
-  font-family:'Fredoka One',cursive;
-  font-size:1.1rem;
-  color:#fff;
-  background:linear-gradient(90deg,var(--accent),#ff8c42);
-  border-radius:20px;
-  padding:3px 18px;
-  pointer-events:none;
-  opacity:0;
-  transition:opacity .3s;
-  white-space:nowrap;
-  text-shadow:0 1px 4px #0008;
-}
-#surge-banner.show{opacity:1;}
+  /* duck wrap position transition */
+  .duck-wrap { transition: left .22s cubic-bezier(.25,0,.15,1); }
 
-.fx-splash{position:absolute;pointer-events:none;z-index:30;font-size:1.2rem;animation:fxUp .55s ease forwards;}
-.fx-pct{position:absolute;pointer-events:none;z-index:30;font-size:.85rem;font-weight:900;font-family:'Fredoka One',cursive;animation:fxUp .75s ease forwards;}
-@keyframes fxUp{0%{opacity:1;transform:translateY(0)scale(1)}100%{opacity:0;transform:translateY(-36px)scale(1.3)}}
+  /* mobile panel toggle */
+  #rpanel { transition: transform .25s ease, opacity .25s ease; }
 
-/* ── PROGRESS BAR SECTION ── */
-#pbar-wrap{background:#060e1a;border-top:1px solid var(--border);padding:6px 10px;flex-shrink:0;display:flex;gap:6px;overflow-x:auto;align-items:flex-end;height:62px;}
-#pbar-wrap::-webkit-scrollbar{height:2px;}
-#pbar-wrap::-webkit-scrollbar-thumb{background:var(--border);}
-.pitem{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:40px;}
-.pitem-flag{font-size:1.1rem;line-height:1;}
-.pbar-bg{width:100%;height:8px;background:#ffffff12;border-radius:4px;overflow:hidden;}
-.pbar-fill{height:100%;border-radius:4px;transition:width .2s;}
-.pitem-pct{
-  font-family:'Fredoka One',cursive;
-  font-size:1rem;
-  font-weight:900;color:#fff;
-  text-shadow:0 0 14px currentColor;
-  line-height:1;
-}
+  /* panel overlay backdrop */
+  #panel-backdrop { transition: opacity .25s ease; }
 
-/* ── RIGHT PANEL ── */
-#rpanel{width:240px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;}
-#rpanel::-webkit-scrollbar{width:3px;}
-#rpanel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+  /* prevent body scroll on mobile when panel open */
+  body.panel-open { overflow: hidden; }
 
-#gift-head{padding:6px 10px;border-bottom:1px solid var(--border);font-family:'Fredoka One',cursive;font-size:.85rem;color:var(--accent);display:flex;align-items:center;gap:5px;flex-shrink:0;}
-.boost-key{margin-left:auto;font-size:.6rem;font-family:'Baloo 2',cursive;color:var(--muted);font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
-.boost-key .bk-gift{color:var(--gold);}
-.boost-key .bk-chat{color:#6a9af0;}
+  /* Sky gradient */
+  #sky { background: linear-gradient(180deg,#0a2a5a,#1565c0); }
 
-#gift-list{flex-shrink:0;display:flex;flex-direction:column;gap:4px;padding:4px 6px;}
+  /* River gradient */
+  #river { background: linear-gradient(180deg,#0a3d7a,#0d47a1 50%,#0a3d7a); }
 
-.gift-row{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ffffff0a,#ffffff05);border:1px solid var(--border2);border-radius:7px;padding:6px 8px;cursor:pointer;transition:.18s;flex-shrink:0;}
-.gift-row:hover{background:linear-gradient(135deg,#ffffff18,#ffffff0d);border-color:#3a6a9a;transform:translateX(2px);}
-.gift-row:active{transform:scale(.97);}
-.gift-row.flash{border-color:var(--gold)!important;background:#ffc83222!important;}
+  /* Win board head gradient */
+  #wboard-head { background: linear-gradient(180deg,#ffc83210,transparent); }
 
-.g-flag{font-size:1.2rem;flex-shrink:0;width:26px;text-align:center;}
-.g-info{flex:1;min-width:0;}
-.g-name{font-size:.8rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
-.g-id{font-size:.65rem;color:var(--green);font-weight:700;letter-spacing:.2px;}
-.g-boost{background:#ffc83220;border:1px solid #ffc83240;border-radius:7px;padding:2px 7px;font-size:.7rem;font-weight:800;color:var(--gold);white-space:nowrap;flex-shrink:0;}
+  /* Header gradient */
+  #hdr { background: linear-gradient(90deg,#051025,#0a1e3a,#051025); }
 
-/* Feed */
-#feed-wrap{flex-shrink:0;border-top:1px solid var(--border);display:flex;flex-direction:column;max-height:90px;overflow:hidden;}
-#feed-head{padding:3px 10px;font-size:.62rem;color:var(--muted);}
-#feed{overflow-y:auto;padding:2px 6px 3px;display:flex;flex-direction:column;gap:2px;flex:1;}
-#feed::-webkit-scrollbar{width:2px;}
-#feed::-webkit-scrollbar-thumb{background:var(--border);}
-.fev{font-size:.62rem;background:#ffffff05;border-radius:4px;padding:2px 6px;animation:fevIn .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;border-left:2px solid transparent;}
-.fev.type-gift{border-color:var(--gold);}.fev.type-chat{border-color:#4a8af0;}
-@keyframes fevIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
-.fev-user{font-weight:800;color:#fff;}
-.fev-country{font-size:.85rem;}
-.fev-tag{font-size:.58rem;background:#ffffff12;border-radius:8px;padding:0 5px;margin-left:2px;}
-.fev-tag.gift{color:var(--gold);}.fev-tag.chat{color:#6a9af0;}
+  /* Winner box gradient */
+  #winner-box { background: linear-gradient(145deg,#0d1e38,#162840); box-shadow: 0 0 60px rgba(255,200,50,.2), inset 0 1px 0 #ffffff18; }
 
-/* CONNECT */
-#conn{padding:8px 8px;border-top:1px solid var(--border);flex-shrink:0;}
-#conn label{font-size:.62rem;color:var(--muted);display:block;margin-bottom:3px;}
-#conn input{width:100%;background:#ffffff08;border:1px solid var(--border2);border-radius:5px;color:#fff;font-family:'Baloo 2',cursive;font-size:.78rem;padding:5px 8px;outline:none;margin-bottom:5px;}
-#conn input:focus{border-color:var(--green);}
-#conn-btn{width:100%;background:var(--accent);border:none;border-radius:7px;color:#fff;font-family:'Fredoka One',cursive;font-size:.95rem;letter-spacing:.5px;padding:7px;cursor:pointer;transition:.18s;}
-#conn-btn:hover{opacity:.88;}
-#conn-btn.on{background:linear-gradient(90deg,#085c35,var(--green));color:#000;}
-#conn-btn:disabled{opacity:.5;cursor:not-allowed;}
+  /* Gift row gradient */
+  .gift-row { background: linear-gradient(135deg,#ffffff0a,#ffffff05); }
+  .gift-row:hover { background: linear-gradient(135deg,#ffffff18,#ffffff0d); }
+
+  /* Grass gradient */
+  .grass { background: linear-gradient(180deg,#2d7a3a,#1a5c2a); }
+
+  /* pbar bg */
+  .pbar-bg { background: #ffffff12; }
+
+  /* shadow util */
+  .river-shadow { box-shadow: 0 0 60px rgba(255,200,50,.2); }
+
+  /* Mobile bottom bar */
+  #mob-bar { display:none; }
+  @media (max-width:768px) {
+    #mob-bar { display:flex; }
+    #wboard  { display:none; }
+    #rpanel  {
+      position:fixed; inset:0; top:0; z-index:200;
+      width:100%; max-width:100%;
+      transform:translateX(100%);
+      overflow-y:auto;
+    }
+    #rpanel.open { transform:translateX(0); }
+    #panel-backdrop { position:fixed; inset:0; z-index:199; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); opacity:0; pointer-events:none; }
+    #panel-backdrop.show { opacity:1; pointer-events:auto; }
+    #race { flex:1; }
+    #main { flex-direction:column; }
+  }
+  @media (min-width:769px) {
+    #panel-backdrop { display:none; }
+  }
 </style>
 </head>
-<body>
+<body class="bg-bg text-[#e8f0ff] flex flex-col h-full overflow-hidden">
 
-<div id="hdr">
-  <div id="hdr-title">🦆 <em>DUCK RACE</em> LIVE 🌏</div>
-  <div class="hstat"><span>👥</span><span id="s-viewers">0</span></div>
-  <div class="hstat"><span>🪙</span><span id="s-coins">0</span></div>
-  <div class="hstat"><span>🏁</span><span id="s-races">0</span></div>
+<!-- HEADER -->
+<div id="hdr" class="flex items-center gap-2 px-3 h-9 flex-shrink-0 border-b border-border2">
+  <div class="font-fredoka text-[1.05rem] text-white whitespace-nowrap">🦆 <span class="text-gold">DUCK RACE</span> LIVE 🌏</div>
 
-  <div id="live-pill">● LIVE</div>
-  <div id="hdr-space"></div>
-  <div class="net-dot" id="net-dot"></div>
-  <span id="net-txt">OFFLINE</span>
+  <div class="flex items-center gap-1 bg-white/5 border border-border rounded-full px-2.5 py-0.5 text-[.72rem] font-bold whitespace-nowrap">
+    <span>👥</span><span id="s-viewers">0</span>
+  </div>
+  <div class="flex items-center gap-1 bg-white/5 border border-border rounded-full px-2.5 py-0.5 text-[.72rem] font-bold whitespace-nowrap">
+    <span>🪙</span><span id="s-coins">0</span>
+  </div>
+  <div class="hidden sm:flex items-center gap-1 bg-white/5 border border-border rounded-full px-2.5 py-0.5 text-[.72rem] font-bold whitespace-nowrap">
+    <span>🏁</span><span id="s-races">0</span>
+  </div>
+
+  <span id="live-pill" class="bg-accent rounded-full px-2.5 py-0.5 text-[.65rem] font-extrabold tracking-widest opacity-0 invisible transition-opacity duration-300 ml-1">● LIVE</span>
+  <div class="flex-1"></div>
+  <span class="net-dot w-2 h-2 rounded-full bg-[#333] transition-all duration-300 flex-shrink-0" id="net-dot"></span>
+  <span id="net-txt" class="text-[.65rem] text-muted">OFFLINE</span>
 </div>
 
-<div id="main">
-  <div id="wboard">
-    <div id="wboard-head">🏆 WIN BOARD</div>
-    <div id="wboard-list">
-      <div style="color:var(--muted);font-size:.65rem;padding:10px;text-align:center;line-height:1.6;">No races yet.<br>🦆 Send gifts!</div>
-    </div>
+<!-- MAIN -->
+<div id="main" class="flex flex-1 overflow-hidden min-h-0">
+
+  <!-- WIN BOARD (desktop only) -->
+  <div id="wboard" class="w-[140px] flex-shrink-0 bg-panel border-r border-border flex flex-col overflow-hidden">
+    <div id="wboard-head" class="px-2.5 py-1.5 font-fredoka text-[.82rem] text-gold tracking-widest text-center border-b border-border">🏆 WIN BOARD</div>
+    <div id="wboard-list" class="flex-1 overflow-y-auto p-1"></div>
   </div>
 
-  <div id="race">
-    <div id="sky">
-      <div id="sky-clouds">
-        <span class="cloud">☁️</span><span class="cloud">☁️</span><span class="cloud">☁️</span>
-        <span class="cloud">☁️</span><span class="cloud">☁️</span><span class="cloud">☁️</span>
+  <!-- RACE CENTER -->
+  <div id="race" class="flex-1 flex flex-col overflow-hidden relative min-w-0">
+
+    <!-- SKY -->
+    <div id="sky" class="h-8 flex-shrink-0 relative overflow-hidden">
+      <div id="sky-clouds" class="absolute inset-0 flex items-center px-2.5 gap-8 pointer-events-none">
+        <span class="text-[.9rem] opacity-50">☁️</span><span class="text-[.9rem] opacity-50">☁️</span>
+        <span class="text-[.9rem] opacity-50">☁️</span><span class="text-[.9rem] opacity-50">☁️</span>
+        <span class="text-[.9rem] opacity-50">☁️</span><span class="text-[.9rem] opacity-50">☁️</span>
       </div>
-      <div id="race-btns">
-        <button class="rbtn" onclick="resetRace()">↺ Reset</button>
-        <button class="rbtn go" onclick="startRace()">▶ START</button>
+      <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex gap-1.5">
+        <button class="bg-white/10 border border-white/20 text-white rounded px-3 py-0.5 font-fredoka text-[.72rem] cursor-pointer hover:bg-white/20 transition-colors" onclick="resetRace()">↺ Reset</button>
+        <button class="bg-accent border border-accent text-white rounded px-3 py-0.5 font-fredoka text-[.72rem] cursor-pointer hover:bg-[#ff1a53] transition-colors" onclick="startRace()">▶ START</button>
       </div>
     </div>
 
-    <div class="grass"></div>
-    
-    <div id="river">
-      <div id="finish"></div>
-      <div id="surge-banner"></div>
-      
-      <div id="winner-ov">
-        <div id="winner-box">
-          <span class="w-duck">🦆</span>
-          <span class="w-flag" id="w-flag">🏳️</span>
-          <div class="w-lbl">🏆 WINNER 🏆</div>
-          <div class="w-country" id="w-country">—</div>
-          <div class="w-stat" id="w-stat"></div>
+    <div class="grass h-2 flex-shrink-0"></div>
+
+    <!-- RIVER -->
+    <div id="river" class="flex-1 overflow-hidden relative">
+      <div id="finish" class="absolute right-[65px] top-0 bottom-0 w-2.5 z-10 opacity-75"
+           style="background:repeating-linear-gradient(180deg,#fff 0,#fff 8px,#111 8px,#111 16px)"></div>
+      <div class="absolute text-xl z-[11]" style="right:70px;top:2px">🏁</div>
+      <div id="surge-banner"
+           class="absolute top-2 left-1/2 -translate-x-1/2 z-50 font-fredoka text-[1.05rem] text-white rounded-full px-4 py-1 pointer-events-none whitespace-nowrap text-shadow"
+           style="background:linear-gradient(90deg,#ff3366,#ff8c42);text-shadow:0 1px 4px #0008"></div>
+
+      <!-- WINNER OVERLAY -->
+      <div id="winner-ov" class="hidden absolute inset-0 z-[999] bg-black/70 backdrop-blur-md items-center justify-center flex-col gap-3">
+        <div id="winner-box" class="border-2 border-gold rounded-2xl px-8 py-4 text-center">
+          <span class="w-duck text-[2.5rem] block">🦆</span>
+          <span class="w-flag text-[2rem] block my-1" id="w-flag">🏳️</span>
+          <div class="font-fredoka text-[.72rem] text-muted tracking-[2px]">🏆 WINNER 🏆</div>
+          <div class="font-fredoka text-[1.8rem] text-gold my-1" id="w-country">—</div>
+          <div class="text-[.7rem] text-muted" id="w-stat"></div>
         </div>
-        <button id="w-replay" onclick="resetRace();document.getElementById('winner-ov').classList.remove('show')">🦆 RACE AGAIN!</button>
+        <button id="w-replay"
+                class="border-none rounded-xl text-white font-fredoka text-[.9rem] tracking-wider px-6 py-2 cursor-pointer transition-all hover:opacity-87 hover:scale-105"
+                style="background:linear-gradient(90deg,#ff3366,#ff8c42)"
+                onclick="resetRace();document.getElementById('winner-ov').classList.remove('show');document.getElementById('winner-ov').style.display=''">
+          🦆 RACE AGAIN!
+        </button>
       </div>
     </div>
 
-    <div class="grass"></div>
-    <div id="pbar-wrap"></div>
+    <div class="grass h-2 flex-shrink-0"></div>
+
+    <!-- PROGRESS BARS -->
+    <div id="pbar-wrap" class="bg-[#060e1a] border-t border-border px-2.5 py-1.5 flex-shrink-0 flex gap-1.5 overflow-x-auto items-end h-[58px]"></div>
   </div>
 
-  <div id="rpanel">
-    <div id="gift-head">
-      🎁 SEND GIFT TO BOOST
-      <div class="boost-key">
-        <span class="bk-gift">🎁 +5%</span>
-        <span class="bk-chat">💬 +0.3%</span>
-      </div>
+  <!-- RIGHT PANEL -->
+  <div id="rpanel" class="w-[240px] flex-shrink-0 bg-panel border-l border-border flex flex-col overflow-y-auto overflow-x-hidden">
+    <!-- Mobile close btn -->
+    <div class="md:hidden flex justify-between items-center px-3 py-2 border-b border-border">
+      <span class="font-fredoka text-[.85rem] text-accent">BOOST PANEL</span>
+      <button onclick="togglePanel()" class="text-muted hover:text-white text-lg leading-none">✕</button>
     </div>
 
-    <div id="gift-list"></div>
-    <div id="feed-wrap">
-      <div id="feed-head">📡 LIVE FEED</div>
-      <div id="feed"></div>
+    <div id="gift-head" class="px-2.5 py-1.5 border-b border-border font-fredoka text-[.82rem] text-accent flex items-center gap-1.5 flex-shrink-0">
+      🎁 SEND GIFT TO BOOST
+      <div class="ml-auto text-[.58rem] font-baloo text-muted font-semibold flex gap-1.5 items-center flex-wrap justify-end">
+        <span class="text-gold">🎁 +5%</span>
+        <span class="text-[#6a9af0]">💬 +0.3%</span>
+      </div>
     </div>
-    <div id="conn">
-      <label>TIKTOK USERNAME</label>
-      <input id="ttUser" type="text" placeholder="@yourusername" />
-      <button id="conn-btn" onclick="toggleConnect()">▶ GO LIVE</button>
+    <div id="gift-list" class="flex-shrink-0 flex flex-col gap-1 p-1.5"></div>
+
+    <!-- FEED -->
+    <div id="feed-wrap" class="flex-shrink-0 border-t border-border flex flex-col" style="max-height:90px;overflow:hidden">
+      <div class="px-2.5 py-1 text-[.6rem] text-muted">📡 LIVE FEED</div>
+      <div id="feed" class="overflow-y-auto px-1.5 pb-1 flex flex-col gap-1 flex-1"></div>
     </div>
+
+    <!-- CONNECT -->
+    <div id="conn" class="p-2 border-t border-border flex-shrink-0">
+      <label class="text-[.6rem] text-muted block mb-1">TIKTOK USERNAME</label>
+      <input id="ttUser" type="text" placeholder="@yourusername"
+             class="w-full bg-white/[.05] border border-border2 rounded text-white font-baloo text-[.76rem] px-2 py-1 outline-none focus:border-green mb-1.5 transition-colors" />
+      <button id="conn-btn" onclick="toggleConnect()"
+              class="w-full bg-accent border-none rounded-lg text-white font-fredoka text-[.92rem] tracking-wider py-1.5 cursor-pointer transition-opacity hover:opacity-88">
+        ▶ GO LIVE
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM BAR -->
+<div id="mob-bar" class="md:hidden flex-shrink-0 flex items-center justify-around bg-panel border-t border-border2 h-10 z-50">
+  <button onclick="toggleWinBoard()" class="flex flex-col items-center gap-0.5 text-muted hover:text-white transition-colors px-3">
+    <span class="text-base">🏆</span>
+    <span class="text-[.55rem] font-bold">WINS</span>
+  </button>
+  <button onclick="resetRace()" class="flex flex-col items-center gap-0.5 text-muted hover:text-white transition-colors px-3">
+    <span class="text-base">↺</span>
+    <span class="text-[.55rem] font-bold">RESET</span>
+  </button>
+  <button onclick="startRace()" class="flex flex-col items-center gap-0.5 text-accent hover:opacity-80 transition-opacity px-3">
+    <span class="text-base">▶</span>
+    <span class="text-[.55rem] font-bold">START</span>
+  </button>
+  <button onclick="togglePanel()" class="flex flex-col items-center gap-0.5 text-muted hover:text-white transition-colors px-3">
+    <span class="text-base">🎁</span>
+    <span class="text-[.55rem] font-bold">BOOST</span>
+  </button>
+  <button onclick="toggleConnect()" id="mob-live-btn" class="flex flex-col items-center gap-0.5 text-muted hover:text-white transition-colors px-3">
+    <span class="text-base">📡</span>
+    <span class="text-[.55rem] font-bold">LIVE</span>
+  </button>
+</div>
+
+<!-- Mobile panel backdrop -->
+<div id="panel-backdrop" onclick="togglePanel()"></div>
+
+<!-- Mobile win board modal -->
+<div id="mob-wboard-modal" class="hidden fixed inset-0 z-[300] flex items-end justify-center md:hidden">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="toggleWinBoard()"></div>
+  <div class="relative bg-panel border border-border2 rounded-t-2xl w-full max-h-[60vh] flex flex-col overflow-hidden">
+    <div class="flex justify-between items-center px-4 py-3 border-b border-border">
+      <span class="font-fredoka text-gold text-base">🏆 WIN BOARD</span>
+      <button onclick="toggleWinBoard()" class="text-muted text-lg">✕</button>
+    </div>
+    <div id="mob-wboard-list" class="overflow-y-auto p-2 flex flex-col gap-1.5 flex-1"></div>
   </div>
 </div>
 
 <script>
-const GIFT_BOOST  = 5;
-const CHAT_BOOST  = 0.3;
+const GIFT_BOOST = 5;
+const CHAT_BOOST = 0.3;
 
 const COUNTRIES = [
-  {id:'ph', name:'Philippines', flag:'🇵🇭', color:'#fcd116', bodyColor:'#003087', giftId:16757, giftName:'Bibingka',          chatCmd:['philippines','ph','pilipinas'], lat:12.8797,  lon:121.7740,  iso:'PH'},
+  {id:'ph', name:'Philippines', flag:'🇵🇭', color:'#fcd116', bodyColor:'#003087', giftId:16757, giftName:'Bibingka',        chatCmd:['philippines','ph','pilipinas'], lat:12.8797,  lon:121.7740,  iso:'PH'},
   {id:'us', name:'USA',         flag:'🇺🇸', color:'#b22234', bodyColor:'#3c3b6e', giftId:5583,  giftName:'Fire',             chatCmd:['usa','us','america'],          lat:37.0902,  lon:-95.7129,  iso:'US'},
   {id:'id', name:'Indonesia',   flag:'🇮🇩', color:'#ce1126', bodyColor:'#dddddd', giftId:5655,  giftName:'Rose',             chatCmd:['indonesia','id'],              lat:-0.7893,  lon:113.9213,  iso:'ID'},
   {id:'br', name:'Brazil',      flag:'🇧🇷', color:'#009c3b', bodyColor:'#ffdf00', giftId:5827,  giftName:'Ice Cream Cone',   chatCmd:['brazil','br','brasil'],        lat:-14.2350, lon:-51.9253,  iso:'BR'},
@@ -339,87 +366,68 @@ function resolveCidFromGeo(isoCode,lat,lon){
   return cid;
 }
 
-// ── RNG RACE PHYSICS ──
-let state = buildState();
+let state=buildState();
 let raceActive=false, raceFinished=false, finishCount=0;
 let totalCoins=0, totalRaces=0, totalViewers=0;
 let connected=false, rafId=null, lastTs=0, ws=null;
 let autoTimer=null;
 let winCounts={};
 COUNTRIES.forEach(c=>winCounts[c.id]=0);
-
-let duckMomentum = {};
+let duckMomentum={};
 
 function buildState(){
   return COUNTRIES.map(c=>({...c,progress:0,coins:0,giftCount:0,chatCount:0,finished:false,finishRank:0}));
 }
-
 function initMomentum(){
   duckMomentum={};
   COUNTRIES.forEach(c=>{
     duckMomentum[c.id]={
-      speed: 0.01 + Math.random()*0.02,
-      surge: 0,
-      surgeLeft: 0,
-      eventCd: Math.floor(80 + Math.random()*120),
+      speed:0.01+Math.random()*0.02,
+      surge:0,surgeLeft:0,
+      eventCd:Math.floor(80+Math.random()*120),
     };
   });
 }
 
-const SURGE_MSGS = [
-  (name,flag) => `${flag} ${name} SURGING! 🚀`,
-  (name,flag) => `${flag} ${name} IS ON FIRE! 🔥`,
-  (name,flag) => `${flag} ${name} OVERTAKING! 💨`,
-  (name,flag) => `COMEBACK! ${flag} ${name} 🌊`,
+const SURGE_MSGS=[
+  (n,f)=>`${f} ${n} SURGING! 🚀`,
+  (n,f)=>`${f} ${n} IS ON FIRE! 🔥`,
+  (n,f)=>`${f} ${n} OVERTAKING! 💨`,
+  (n,f)=>`COMEBACK! ${f} ${n} 🌊`,
 ];
-
-let surgeBannerTimer = null;
+let surgeBannerTimer=null;
 function showSurgeBanner(msg){
   const b=document.getElementById('surge-banner');
-  b.textContent=msg;b.classList.add('show');
+  b.textContent=msg; b.classList.add('show');
   clearTimeout(surgeBannerTimer);
   surgeBannerTimer=setTimeout(()=>b.classList.remove('show'),1800);
 }
 
 function tickMomentum(dt){
   const sorted=[...state].filter(c=>!c.finished).sort((a,b)=>b.progress-a.progress);
-  const leader = sorted[0];
-
+  const leader=sorted[0];
   sorted.forEach((c,rank)=>{
-    const m=duckMomentum[c.id];
-    if(!m)return;
-
+    const m=duckMomentum[c.id]; if(!m)return;
     m.eventCd-=(dt/16);
-
-    if(m.surgeLeft>0){
-      m.surgeLeft-=(dt/16);
-      if(m.surgeLeft<=0){ m.surge=1; }
-    }
-
+    if(m.surgeLeft>0){ m.surgeLeft-=(dt/16); if(m.surgeLeft<=0){ m.surge=1; } }
     if(m.eventCd<=0){
       m.eventCd=60+Math.random()*160;
       const rng=Math.random();
-
       if(rank===0){
-        if(rng<0.40){
-          m.surge=0.18+Math.random()*0.22;
-          m.surgeLeft=60+Math.random()*90;
-        } else {
-          m.surge=0.65;m.surgeLeft=30+Math.random()*40;
-        }
+        if(rng<0.40){ m.surge=0.18+Math.random()*0.22; m.surgeLeft=60+Math.random()*90; }
+        else { m.surge=0.65; m.surgeLeft=30+Math.random()*40; }
       } else {
-        const gap = (leader ? leader.progress : 0) - c.progress;
-        const surgeChance = 0.30 + (gap/100)*0.45;
-        if(rng < surgeChance){
-          m.surge = 1.8 + Math.random()*1.4;
-          m.surgeLeft = 40 + Math.random()*80;
-          if(gap>5 && rank<=2){
+        const gap=(leader?leader.progress:0)-c.progress;
+        const surgeChance=0.30+(gap/100)*0.45;
+        if(rng<surgeChance){
+          m.surge=1.8+Math.random()*1.4; m.surgeLeft=40+Math.random()*80;
+          if(gap>5&&rank<=2){
             const country=COUNTRIES.find(x=>x.id===c.id);
             const msgFn=SURGE_MSGS[Math.floor(Math.random()*SURGE_MSGS.length)];
-            showSurgeBanner(msgFn(country.name, country.flag));
+            showSurgeBanner(msgFn(country.name,country.flag));
           }
         } else if(rng<surgeChance+0.15){
-          m.surge=0.5;m.surgeLeft=25+Math.random()*35;
+          m.surge=0.5; m.surgeLeft=25+Math.random()*35;
         }
       }
     }
@@ -428,27 +436,23 @@ function tickMomentum(dt){
 
 function raceLoop(ts){
   if(!raceActive)return;
-  const dt=Math.min(ts-lastTs,50);lastTs=ts;
-
+  const dt=Math.min(ts-lastTs,50); lastTs=ts;
   tickMomentum(dt);
-
   state.forEach(c=>{
     if(c.finished)return;
     const m=duckMomentum[c.id];
-    const surgeMulti = (m&&m.surgeLeft>0) ? m.surge : 1.0;
-    const baseSpeed = m ? m.speed : 0.045;
-    const noise = 0.6+Math.random()*0.8;
-    let finishDrag = 1.0;
-    if(c.progress>88) finishDrag = 0.60;
-    if(c.progress>94) finishDrag = 0.40;
-    const speed = baseSpeed * surgeMulti * noise * finishDrag;
-    c.progress += speed*(dt/16);
+    const surgeMulti=(m&&m.surgeLeft>0)?m.surge:1.0;
+    const baseSpeed=m?m.speed:0.045;
+    const noise=0.6+Math.random()*0.8;
+    let finishDrag=1.0;
+    if(c.progress>88) finishDrag=0.60;
+    if(c.progress>94) finishDrag=0.40;
+    c.progress+=baseSpeed*surgeMulti*noise*finishDrag*(dt/16);
     if(c.progress>=100){
-      c.progress=100;c.finished=true;finishCount++;c.finishRank=finishCount;
+      c.progress=100; c.finished=true; finishCount++; c.finishRank=finishCount;
       if(finishCount===1) onWinner(c);
     }
   });
-
   updatePositions();
   rafId=requestAnimationFrame(raceLoop);
 }
@@ -456,19 +460,18 @@ function raceLoop(ts){
 function startRace(){
   if(raceActive)return;
   if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
-  initMomentum();
-  raceActive=true;raceFinished=false;lastTs=performance.now();
-  rafId=requestAnimationFrame(raceLoop);
+  initMomentum(); raceActive=true; raceFinished=false;
+  lastTs=performance.now(); rafId=requestAnimationFrame(raceLoop);
 }
 
 function resetRace(){
-  raceActive=false;raceFinished=false;finishCount=0;
+  raceActive=false; raceFinished=false; finishCount=0;
   if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
   if(rafId)cancelAnimationFrame(rafId);
-  state=buildState();
-  totalCoins=0;
-  buildRiver();buildProgressBars();updatePositions();
-  document.getElementById('winner-ov').classList.remove('show');
+  state=buildState(); totalCoins=0;
+  buildRiver(); buildProgressBars(); updatePositions();
+  const ov=document.getElementById('winner-ov');
+  ov.classList.remove('show'); ov.style.display='';
   document.getElementById('surge-banner').classList.remove('show');
 }
 
@@ -481,7 +484,6 @@ function boost(cid,amount,type,user){
   else if(type==='chat'){c.chatCount++;}
   if(!raceActive)startRace();
   if(c.progress>=100){c.progress=100;c.finished=true;finishCount++;c.finishRank=finishCount;if(finishCount===1)onWinner(c);}
-
   const row=document.getElementById('gift-row-'+cid);
   if(row){row.classList.add('flash');setTimeout(()=>row.classList.remove('flash'),500);}
   const wrap=document.getElementById('duck-'+cid);
@@ -489,22 +491,23 @@ function boost(cid,amount,type,user){
     wrap.classList.add('boosted');
     clearTimeout(wrap._bt);
     wrap._bt=setTimeout(()=>wrap.classList.remove('boosted'),650);
-    const emoji=type==='gift'?'🎁':'💬';
-    const color=type==='gift'?'#ffc832':'#6a9af0';
-    spawnFX(wrap,emoji,color,'+'+amount+'%');
+    spawnFX(wrap,type==='gift'?'🎁':'💬',type==='gift'?'#ffc832':'#6a9af0','+'+amount+'%');
   }
-  addFeed(user,c,type);
-  updatePositions();
+  addFeed(user,c,type); updatePositions();
 }
 
 function spawnFX(wrap,emoji,color,label){
   const river=document.getElementById('river');
   const wr=wrap.getBoundingClientRect(),rr=river.getBoundingClientRect();
   const x=wr.left-rr.left+8,y=wr.top-rr.top;
-  const s=document.createElement('div');s.className='fx-splash';s.textContent=emoji;s.style.cssText=`left:${x}px;top:${y}px`;
-  river.appendChild(s);setTimeout(()=>s.remove(),650);
-  const p=document.createElement('div');p.className='fx-pct';p.textContent=label;p.style.cssText=`color:${color};left:${x+20}px;top:${y-8}px`;
-  river.appendChild(p);setTimeout(()=>p.remove(),850);
+  const s=document.createElement('div');
+  s.className='fx-splash absolute pointer-events-none z-[30] text-xl';
+  s.textContent=emoji; s.style.cssText=`left:${x}px;top:${y}px`;
+  river.appendChild(s); setTimeout(()=>s.remove(),650);
+  const p=document.createElement('div');
+  p.className='fx-pct absolute pointer-events-none z-[30] text-[.85rem] font-black font-fredoka';
+  p.textContent=label; p.style.cssText=`color:${color};left:${x+20}px;top:${y-8}px`;
+  river.appendChild(p); setTimeout(()=>p.remove(),850);
 }
 
 function doGift(cid,user){boost(cid,GIFT_BOOST,'gift',user||'you');}
@@ -521,24 +524,25 @@ function parseChatCommand(msg,user){
 function addFeed(user,country,type){
   const feed=document.getElementById('feed');
   const div=document.createElement('div');
-  div.className='fev type-'+type;
-  let tag;
-  if(type==='gift') tag=`<span class="fev-tag gift">🎁 ${country.giftName} +${GIFT_BOOST}%</span>`;
-  else tag=`<span class="fev-tag chat">💬 /${country.id} +${CHAT_BOOST}%</span>`;
-  div.innerHTML=`<span class="fev-country">${country.flag}</span><span class="fev-user">${user}</span>${tag}`;
+  div.className='fev text-[.6rem] bg-white/[.03] rounded px-1.5 py-0.5 whitespace-nowrap overflow-hidden text-ellipsis flex items-center gap-1 border-l-2 '+(type==='gift'?'border-gold':'border-[#4a8af0]');
+  const tag=type==='gift'
+    ?`<span class="text-[.56rem] bg-white/[.1] rounded-lg px-1 ml-0.5 text-gold">🎁 ${country.giftName} +${GIFT_BOOST}%</span>`
+    :`<span class="text-[.56rem] bg-white/[.1] rounded-lg px-1 ml-0.5 text-[#6a9af0]">💬 /${country.id} +${CHAT_BOOST}%</span>`;
+  div.innerHTML=`<span class="text-[.85rem]">${country.flag}</span><span class="font-bold text-white">${user}</span>${tag}`;
   feed.prepend(div);
   while(feed.children.length>20)feed.removeChild(feed.lastChild);
 }
 
 function onWinner(c){
-  raceActive=false;raceFinished=true;totalRaces++;
+  raceActive=false; raceFinished=true; totalRaces++;
   winCounts[c.id]++;
   updateWinBoard();
   setTimeout(()=>{
     document.getElementById('w-flag').textContent=c.flag;
     document.getElementById('w-country').textContent=c.name.toUpperCase();
     document.getElementById('w-stat').textContent=`Won with ${c.coins} boosts!`;
-    document.getElementById('winner-ov').classList.add('show');
+    const ov=document.getElementById('winner-ov');
+    ov.style.display='flex'; ov.classList.add('show');
     let timeLeft=3;
     const btn=document.getElementById('w-replay');
     btn.textContent=`NEXT RACE IN ${timeLeft}...`;
@@ -546,9 +550,8 @@ function onWinner(c){
       timeLeft--;
       if(timeLeft<=0){
         clearInterval(autoTimer);
-        resetRace();
-        setTimeout(startRace,500);
-      }else{
+        resetRace(); setTimeout(startRace,500);
+      } else {
         btn.textContent=`NEXT RACE IN ${timeLeft}...`;
       }
     },1000);
@@ -559,15 +562,33 @@ function onWinner(c){
 
 function updateWinBoard(){
   const sorted=COUNTRIES.filter(c=>winCounts[c.id]>0).sort((a,b)=>winCounts[b.id]-winCounts[a.id]);
+  const emptyMsg='<div class="text-muted text-[.63rem] p-2.5 text-center leading-relaxed">No races yet.<br>🦆 Send gifts!</div>';
+
+  // Desktop
   const list=document.getElementById('wboard-list');
   list.innerHTML='';
-  if(!sorted.length){list.innerHTML='<div style="color:var(--muted);font-size:.65rem;padding:10px;text-align:center;line-height:1.6;">No races yet.<br>🦆 Send gifts!</div>';return;}
+  if(!sorted.length){list.innerHTML=emptyMsg;return;}
   sorted.forEach((c,i)=>{
     const d=document.createElement('div');
-    d.className='we '+(i===0?'r1':i===1?'r2':i===2?'r3':'');
+    const borderCls=i===0?'border-l-gold':i===1?'border-l-silver':i===2?'border-l-bronze':'border-l-border';
+    d.className=`we flex items-center gap-1.5 px-1.5 py-1 bg-white/[.03] rounded mb-1 border-l-[3px] text-[.7rem] ${borderCls}`;
+    d.style.borderLeftColor=i===0?'#ffc832':i===1?'#b8c8d8':i===2?'#c87832':'#333';
     const m=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
-    d.innerHTML=`<span class="we-medal">${m}</span><span class="we-flag">${c.flag}</span><span class="we-name">${c.name}</span><span class="we-ct">${winCounts[c.id]}</span>`;
+    d.innerHTML=`<span class="text-[.83rem] flex-shrink-0">${m}</span><span class="text-base flex-shrink-0">${c.flag}</span><span class="flex-1 font-bold overflow-hidden text-ellipsis whitespace-nowrap">${c.name}</span><span class="bg-white/[.1] rounded-lg px-1.5 text-[.63rem] font-black text-gold">${winCounts[c.id]}</span>`;
     list.appendChild(d);
+  });
+
+  // Mobile modal
+  const mList=document.getElementById('mob-wboard-list');
+  mList.innerHTML='';
+  if(!sorted.length){mList.innerHTML=emptyMsg;return;}
+  sorted.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='flex items-center gap-2 px-3 py-2 bg-white/[.04] rounded-lg border-l-[3px] text-[.78rem]';
+    d.style.borderLeftColor=i===0?'#ffc832':i===1?'#b8c8d8':i===2?'#c87832':'#333';
+    const m=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+    d.innerHTML=`<span class="text-base">${m}</span><span class="text-xl">${c.flag}</span><span class="flex-1 font-bold">${c.name}</span><span class="bg-gold/20 border border-gold/40 rounded-lg px-2 py-0.5 text-[.7rem] font-black text-gold">${winCounts[c.id]}</span>`;
+    mList.appendChild(d);
   });
 }
 
@@ -576,9 +597,10 @@ function buildGiftList(){
   list.innerHTML='';
   COUNTRIES.forEach(c=>{
     const row=document.createElement('div');
-    row.className='gift-row';row.id='gift-row-'+c.id;
+    row.className='gift-row flex items-center gap-2 border border-border2 rounded-lg px-2 py-1.5 cursor-pointer transition-all hover:border-[#3a6a9a] hover:translate-x-0.5 active:scale-95';
+    row.id='gift-row-'+c.id;
     row.onclick=()=>doGift(c.id,'you');
-    row.innerHTML=`<span class="g-flag">${c.flag}</span><div class="g-info"><div class="g-name">${c.giftName}</div><div class="g-id">ID: ${c.giftId} · ${c.name}</div></div><span class="g-boost">+${GIFT_BOOST}%</span>`;
+    row.innerHTML=`<span class="text-[1.2rem] flex-shrink-0 w-6 text-center">${c.flag}</span><div class="flex-1 min-w-0"><div class="text-[.78rem] font-black whitespace-nowrap overflow-hidden text-ellipsis leading-tight">${c.giftName}</div><div class="text-[.62rem] text-green font-bold tracking-tight">ID:${c.giftId} · ${c.name}</div></div><span class="bg-gold/10 border border-gold/30 rounded-lg px-2 py-0.5 text-[.68rem] font-black text-gold whitespace-nowrap flex-shrink-0">+${GIFT_BOOST}%</span>`;
     list.appendChild(row);
   });
 }
@@ -603,19 +625,21 @@ function buildRiver(){
   river.querySelectorAll('.duck-wrap,.wrow').forEach(e=>e.remove());
   for(let i=0;i<4;i++){
     const w=document.createElement('div');
-    w.className='wrow';w.style.top=(12+i*22)+'%';
+    w.className='wrow absolute left-0 right-0 h-1 pointer-events-none opacity-20';
+    w.style.top=(12+i*22)+'%';
     w.style.setProperty('--spd',(5+i*1.5)+'s');
     river.appendChild(w);
   }
   const riverH=river.clientHeight||300;
   const laneH=riverH/state.length;
-  const ds=32;
+  const ds=28;
   state.forEach((c,i)=>{
     const wrap=document.createElement('div');
-    wrap.className='duck-wrap';wrap.id='duck-'+c.id;
+    wrap.className='duck-wrap absolute flex flex-col items-center';
+    wrap.id='duck-'+c.id;
     wrap.style.top=(laneH*i+laneH/2-ds*0.75)+'px';
     wrap.style.left='14px';
-    wrap.innerHTML=`<div class="duck-tag"><span>${c.flag}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name}</span></div>`+makeDuck(c.color,c.bodyColor,ds);
+    wrap.innerHTML=`<div style="background:#000000cc;border:1px solid #ffffff22;border-radius:5px;padding:1px 5px;font-size:.55rem;font-weight:800;white-space:nowrap;display:flex;align-items:center;gap:2px;max-width:72px;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;font-family:'Baloo 2',cursive"><span>${c.flag}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</span></div>`+makeDuck(c.color,c.bodyColor,ds);
     river.appendChild(wrap);
   });
 }
@@ -625,8 +649,8 @@ function buildProgressBars(){
   wrap.innerHTML='';
   state.forEach(c=>{
     const d=document.createElement('div');
-    d.className='pitem';
-    d.innerHTML=`<span class="pitem-flag">${c.flag}</span><div class="pbar-bg"><div class="pbar-fill" id="pb-${c.id}" style="background:${c.color};width:0%"></div></div><span class="pitem-pct" id="pp-${c.id}" style="color:${c.color};text-shadow:0 0 12px ${c.color}">0%</span>`;
+    d.className='flex flex-col items-center gap-0.5 flex-1 min-w-[36px]';
+    d.innerHTML=`<span class="text-[1rem] leading-none">${c.flag}</span><div class="pbar-bg w-full h-2 rounded-full overflow-hidden"><div class="pbar-fill h-full rounded-full" id="pb-${c.id}" style="background:${c.color};width:0%"></div></div><span id="pp-${c.id}" class="font-fredoka text-[.88rem] font-black text-white leading-none" style="color:${c.color};text-shadow:0 0 12px ${c.color}">0%</span>`;
     wrap.appendChild(d);
   });
 }
@@ -634,7 +658,7 @@ function buildProgressBars(){
 function updatePositions(){
   const river=document.getElementById('river');
   const riverW=river.clientWidth||600;
-  const finRight=70,startX=14,ds=32;
+  const finRight=70,startX=14,ds=28;
   const range=riverW-finRight-startX-ds;
   state.forEach(c=>{
     const wrap=document.getElementById('duck-'+c.id);
@@ -653,10 +677,12 @@ function updatePositions(){
 function showConnectionError(msg){
   connected=false;
   const btn=document.getElementById('conn-btn');
-  btn.textContent='▶ GO LIVE';btn.classList.remove('on');btn.disabled=false;
+  btn.textContent='▶ GO LIVE'; btn.style.background=''; btn.disabled=false;
   document.getElementById('net-dot').classList.remove('on');
   document.getElementById('net-txt').textContent='OFFLINE';
   document.getElementById('live-pill').classList.remove('on');
+  document.getElementById('live-pill').style.visibility='hidden';
+  document.getElementById('live-pill').style.opacity='0';
   alert('❌ Connection failed: '+msg+'\n\nMake sure your TikTok Live bridge is running on ws://localhost:8080');
 }
 
@@ -664,17 +690,29 @@ function toggleConnect(){
   const user=document.getElementById('ttUser').value.trim().replace('@','');
   const btn=document.getElementById('conn-btn');
   if(!connected){
-    if(!user){alert('Enter your TikTok username!');return;}
-    btn.textContent='⏳ CONNECTING…';btn.disabled=true;
+    if(!user){
+      // On mobile, open panel first if needed
+      const isMob=window.innerWidth<769;
+      if(isMob&&!document.getElementById('rpanel').classList.contains('open')){
+        togglePanel();return;
+      }
+      alert('Enter your TikTok username!');return;
+    }
+    btn.textContent='⏳ CONNECTING…'; btn.disabled=true;
     try{
       ws=new WebSocket('ws://localhost:8080');
       ws.onopen=()=>{
         ws.send(JSON.stringify({action:'connect',username:user}));
         connected=true;
-        btn.textContent='■ DISCONNECT';btn.classList.add('on');btn.disabled=false;
-        document.getElementById('net-dot').classList.add('on');
+        btn.textContent='■ DISCONNECT';
+        btn.style.background='linear-gradient(90deg,#085c35,#00e5a0)';
+        btn.style.color='#000';
+        btn.disabled=false;
+        document.getElementById('net-dot').style.background='#00e5a0';
+        document.getElementById('net-dot').style.boxShadow='0 0 7px #00e5a0';
         document.getElementById('net-txt').textContent='LIVE: @'+user;
-        document.getElementById('live-pill').classList.add('on');
+        const pill=document.getElementById('live-pill');
+        pill.style.visibility='visible'; pill.style.opacity='1'; pill.classList.add('on');
         if(!raceActive)startRace();
       };
       ws.onmessage=e=>{
@@ -683,31 +721,49 @@ function toggleConnect(){
           if(data.type==='gift'){
             const c=COUNTRIES.find(x=>x.giftId==data.giftId);
             if(c)doGift(c.id,data.user||'viewer');
-          }
-          else if(data.type==='chat'){
+          } else if(data.type==='chat'){
             parseChatCommand(data.msg,data.user||'viewer');
-          }
-          else if(data.type==='viewer'){
-            totalViewers=data.count||totalViewers;
-            updatePositions();
+          } else if(data.type==='viewer'){
+            totalViewers=data.count||totalViewers; updatePositions();
           }
         }catch(err){}
       };
       ws.onerror=()=>showConnectionError('Could not reach bridge server on localhost:8080');
       ws.onclose=()=>{if(connected)showConnectionError('Bridge server disconnected unexpectedly');};
     }catch(e){showConnectionError('WebSocket not supported or failed to connect');}
-  }else{
+  } else {
     connected=false;
-    btn.textContent='▶ GO LIVE';btn.classList.remove('on');btn.disabled=false;
-    document.getElementById('net-dot').classList.remove('on');
+    btn.textContent='▶ GO LIVE'; btn.style.background=''; btn.style.color=''; btn.disabled=false;
+    document.getElementById('net-dot').style.background='#333'; document.getElementById('net-dot').style.boxShadow='';
     document.getElementById('net-txt').textContent='OFFLINE';
-    document.getElementById('live-pill').classList.remove('on');
+    const pill=document.getElementById('live-pill');
+    pill.style.visibility='hidden'; pill.style.opacity='0'; pill.classList.remove('on');
     if(ws){try{ws.close();}catch(e2){}ws=null;}
   }
 }
 
+// Mobile panel toggle
+function togglePanel(){
+  const panel=document.getElementById('rpanel');
+  const backdrop=document.getElementById('panel-backdrop');
+  const isOpen=panel.classList.contains('open');
+  if(isOpen){
+    panel.classList.remove('open');
+    backdrop.classList.remove('show');
+  } else {
+    panel.classList.add('open');
+    backdrop.classList.add('show');
+  }
+}
+
+// Mobile win board toggle
+function toggleWinBoard(){
+  const modal=document.getElementById('mob-wboard-modal');
+  modal.classList.toggle('hidden');
+}
+
 window.addEventListener('load',()=>{
-  buildGiftList();buildRiver();buildProgressBars();updatePositions();updateWinBoard();
+  buildGiftList(); buildRiver(); buildProgressBars(); updatePositions(); updateWinBoard();
 });
 window.addEventListener('resize',()=>{buildRiver();updatePositions();});
 </script>
